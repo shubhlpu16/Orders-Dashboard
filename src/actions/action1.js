@@ -15,7 +15,7 @@ const addStore = (data) => (dispatch) => {
 };
 
 export const fetchData = (city) => async (dispatch) => {
-  let url = 'http://localhost:5000/orders';
+  let url = 'https://shubh-orders-app.herokuapp.com/orders';
   if (city !== 'All') {
     url = `${url}?city=${city}`;
   }
