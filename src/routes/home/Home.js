@@ -167,7 +167,7 @@ function Dashboard(props) {
         <Box mt={5} mb={2}>
           <Title>Bottom 5 User</Title>
           {Object.keys(tableDatas).length && (
-            <Table data={tableDatas.userTop5} />
+            <Table data={tableDatas.userBottom5} />
           )}
         </Box>
       </Paper>

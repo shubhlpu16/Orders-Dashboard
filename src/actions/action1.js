@@ -164,13 +164,14 @@ export const prepareTableData = (params) => {
 
   const orderHeader = Object.values(headers.ordersHeader);
   const userHeader = Object.values(headers.userHeader);
+  const bottomOrder = orders.length < 5 ? [] : orders.slice(orders.length - 5);
   return {
     ordersTop5: {
       row: populateData(headers.ordersHeader, orders.slice(0, 5)),
       header: orderHeader,
     },
     orderBottom5: {
-      row: populateData(headers.ordersHeader, orders.slice(orders.length - 5)),
+      row: populateData(headers.ordersHeader, bottomOrder),
       header: orderHeader,
     },
     userTop5: {
@@ -178,7 +179,7 @@ export const prepareTableData = (params) => {
       header: userHeader,
     },
     userBottom5: {
-      row: populateData(headers.userHeader, orders.slice(orders.length - 5)),
+      row: populateData(headers.userHeader, bottomOrder),
       header: userHeader,
     },
   };
