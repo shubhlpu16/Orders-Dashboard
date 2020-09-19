@@ -8,14 +8,14 @@ import Box from '@material-ui/core/Box';
 import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
-// import Divider from '@material-ui/core/Divider';
+import InputLabel from '@material-ui/core/InputLabel';
+import FormControl from '@material-ui/core/FormControl';
+import Select from '@material-ui/core/Select';
 import Container from '@material-ui/core/Container';
 import Grid from '@material-ui/core/Grid';
 import Paper from '@material-ui/core/Paper';
 import Link from '@material-ui/core/Link';
 import { Context } from '../../AppContext';
-
-// import { mainListItems, secondaryListItems } from './listItems';
 import Summary from '../../components/Summary';
 import Title from '../../components/Title';
 import Chart from '../../components/Chart';
@@ -27,8 +27,10 @@ import {
   prepareChartData,
   prepareTableData,
   prepareReportData,
+  populateCities,
 } from '../../actions/action1';
 import { SUMMARY } from '../../utils/viewConfig';
+import { toCapitalize } from '../../utils/HelperMethods';
 
 function Copyright() {
   return (
@@ -87,6 +89,10 @@ const useStyles = makeStyles((theme) => ({
   chartHeight: {
     height: 400,
   },
+  formControl: {
+    margin: theme.spacing(2),
+    minWidth: 120,
+  },
 }));
 
 function Dashboard(props) {
@@ -100,20 +106,28 @@ function Dashboard(props) {
   const [chartData, setChartData] = useState([]);
   const [tableDatas, setTableData] = useState({});
   const [reportData, setReportData] = useState({});
+  const [cities, setCities] = useState(['All']);
+  const [city, setCity] = useState('All');
 
   const { store } = useContext(Context);
 
-  useEffect(async () => {
-    await props.fetchData();
+  const populateData = async () => {
+    await props.fetchData(city);
     const summaryData = prepareSummary({ store });
     const data = prepareChartData({ store });
     const tableData = prepareTableData({ store });
     const report = prepareReportData({ store });
+    const distinctCities = populateCities({ store });
     setSummaryData(summaryData);
     setChartData(data);
     setTableData(tableData);
     setReportData(report);
-  }, []);
+    setCities(['All', ...distinctCities]);
+  };
+
+  useEffect(() => {
+    populateData();
+  }, [city]);
 
   const displayOrderSummary = () => (
     <>
@@ -182,6 +196,22 @@ function Dashboard(props) {
           >
             Dashboard
           </Typography>
+          <FormControl className={classes.formControl}>
+            <InputLabel htmlFor="native-simple">City</InputLabel>
+            <Select
+              native
+              value={city}
+              onChange={(event) => setCity(event.target.value)}
+              inputProps={{
+                name: 'region',
+                id: 'native-simple',
+              }}
+            >
+              {cities.map((e) => {
+                return <option value={e}>{toCapitalize(e)}</option>;
+              })}
+            </Select>
+          </FormControl>
         </Toolbar>
       </AppBar>
       <main className={classes.content}>

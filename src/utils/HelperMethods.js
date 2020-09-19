@@ -35,3 +35,10 @@ export const getMonthStartDate = (date) => {
 export const toCapitalize = (string) => {
   return string.charAt(0).toUpperCase() + string.slice(1);
 };
+
+export const getLastMonthDates = () => {
+  const date = new Date();
+  const firstDay = new Date(date.getFullYear(), date.getMonth() - 1, 1);
+  const lastDay = new Date(date.getFullYear(), date.getMonth(), 0);
+  return [firstDay, lastDay];
+};

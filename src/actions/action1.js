@@ -4,6 +4,7 @@ import {
   convertToDateFormat,
   getWeekStartDate,
   getMonthStartDate,
+  getLastMonthDates,
 } from '../utils/HelperMethods';
 
 const addStore = (data) => (dispatch) => {
@@ -13,9 +14,13 @@ const addStore = (data) => (dispatch) => {
   });
 };
 
-export const fetchData = () => async (dispatch) => {
+export const fetchData = (city) => async (dispatch) => {
+  let url = 'http://localhost:5000/orders';
+  if (city !== 'All') {
+    url = `${url}?city=${city}`;
+  }
   await axios
-    .get('http://localhost:5000/orders')
+    .get(url)
     .then((response) => {
       dispatch(addStore({ storeData: response.data }));
     })
@@ -36,11 +41,12 @@ export const prepareSummary = (params) => {
   const todayDate = convertToDateFormat(new Date());
   const weekDate = getWeekStartDate(todayDate);
   const monthDate = getMonthStartDate(todayDate);
-  // const [lastMonthStart,lastMonthEnd]=getLastMonthDate
+  const [lastMonthStart, lastMonthEnd] = getLastMonthDates();
   const { orders } = store.getState().orderStore;
   const todayOrders = [];
   const weekOrders = [];
   const monthOrders = [];
+  const lastMonthOrders = [];
   orders.forEach((order) => {
     const orderDate = convertToDateFormat(new Date(order.createdAt));
     if (new Date(todayDate).getTime() === new Date(orderDate).getTime()) {
@@ -58,10 +64,19 @@ export const prepareSummary = (params) => {
     ) {
       monthOrders.push(order);
     }
+    if (
+      new Date(lastMonthStart).getTime() <= new Date(orderDate).getTime() &&
+      new Date(orderDate).getTime() <= new Date(lastMonthEnd).getTime()
+    ) {
+      lastMonthOrders.push(order);
+    }
   });
   const [todayOrderCount, todayAmount] = getCountAndAmount(todayOrders);
   const [weekOrderCount, weekAmount] = getCountAndAmount(weekOrders);
   const [monthOrderCount, monthAmount] = getCountAndAmount(monthOrders);
+  const [lastMonthOrderCount, lastMonthAmount] = getCountAndAmount(
+    lastMonthOrders,
+  );
   const OverAllSummary = [
     {
       title1: `Today's Order`,
@@ -79,14 +94,14 @@ export const prepareSummary = (params) => {
       title1: `MTD Order`,
       title2: 'Last Month Order',
       value1: monthOrderCount,
-      value2: 0,
+      value2: lastMonthOrderCount,
     },
 
     {
       title1: `MTD Order Amount`,
       title2: 'Last Month Order Amount',
       value1: monthAmount,
-      value2: 0,
+      value2: lastMonthAmount,
     },
   ];
 
@@ -189,4 +204,10 @@ export const prepareReportData = (params) => {
   };
 };
 
+export const populateCities = (params) => {
+  const { store } = params;
+  const { orders } = store.getState().orderStore;
+  const cities = [...new Set(orders.map((e) => e.city))];
+  return cities;
+};
 export default addStore;
