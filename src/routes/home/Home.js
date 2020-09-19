@@ -1,5 +1,7 @@
-import React from 'react';
+import React, { useEffect, useContext, useState } from 'react';
 import clsx from 'clsx';
+import PropTypes from 'prop-types';
+import { connect } from 'react-redux';
 import { makeStyles } from '@material-ui/core/styles';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import Box from '@material-ui/core/Box';
@@ -11,6 +13,7 @@ import Container from '@material-ui/core/Container';
 import Grid from '@material-ui/core/Grid';
 import Paper from '@material-ui/core/Paper';
 import Link from '@material-ui/core/Link';
+import { Context } from '../../AppContext';
 
 // import { mainListItems, secondaryListItems } from './listItems';
 import Summary from '../../components/Summary';
@@ -18,7 +21,14 @@ import Title from '../../components/Title';
 import Chart from '../../components/Chart';
 import Table from '../../components/Table';
 import Report from '../../components/Report';
-// import Orders from './Orders';
+import {
+  fetchData,
+  prepareSummary,
+  prepareChartData,
+  prepareTableData,
+  prepareReportData,
+} from '../../actions/action1';
+import { SUMMARY } from '../../utils/viewConfig';
 
 function Copyright() {
   return (
@@ -69,74 +79,51 @@ const useStyles = makeStyles((theme) => ({
     color: '#42a5f5',
   },
   fixedHeight: {
-    height: 210,
+    height: 260,
   },
   tableHeight: {
     height: 'max-content',
-    overflow: 'hidden',
   },
   chartHeight: {
     height: 400,
   },
 }));
 
-export default function Dashboard() {
+function Dashboard(props) {
   const classes = useStyles();
 
   const fixedHeightPaper = clsx(classes.paper, classes.fixedHeight);
   const tableHeight = clsx(classes.tableHeight, classes.paper);
   const chartHeight = clsx(classes.chartHeight, classes.paper);
 
+  const [overAllSumary, setSummaryData] = useState(SUMMARY);
+  const [chartData, setChartData] = useState([]);
+  const [tableDatas, setTableData] = useState({});
+  const [reportData, setReportData] = useState({});
+
+  const { store } = useContext(Context);
+
+  useEffect(async () => {
+    await props.fetchData();
+    const summaryData = prepareSummary({ store });
+    const data = prepareChartData({ store });
+    const tableData = prepareTableData({ store });
+    const report = prepareReportData({ store });
+    setSummaryData(summaryData);
+    setChartData(data);
+    setTableData(tableData);
+    setReportData(report);
+  }, []);
+
   const displayOrderSummary = () => (
     <>
-      <Grid item xs={12} md={3} lg={3}>
-        <Paper className={clsx(fixedHeightPaper, { backgroundColor: 'red' })}>
-          <Summary
-            summary={{
-              title1: `Today's Order`,
-              title2: 'Current Week Order',
-              value1: '2300',
-              value2: '400',
-            }}
-          />
-        </Paper>
-      </Grid>
-      <Grid item xs={12} md={3} lg={3}>
-        <Paper className={fixedHeightPaper}>
-          <Summary
-            summary={{
-              title1: `Today's Order`,
-              title2: 'Current Week Order',
-              value1: '2300',
-              value2: '400',
-            }}
-          />
-        </Paper>
-      </Grid>
-      <Grid item xs={12} md={3} lg={3}>
-        <Paper className={fixedHeightPaper}>
-          <Summary
-            summary={{
-              title1: `Today's Order`,
-              title2: 'Current Week Order',
-              value1: '2300',
-              value2: '400',
-            }}
-          />
-        </Paper>
-      </Grid>
-      <Grid item xs={12} md={3} lg={3}>
-        <Paper className={fixedHeightPaper}>
-          <Summary
-            summary={{
-              title1: `Today's Order`,
-              title2: 'Current Week Order',
-              value1: '2300',
-              value2: '400',
-            }}
-          />
-        </Paper>
-      </Grid>
+      {overAllSumary.map((summary) => (
+        <Grid item xs={12} md={3} lg={3}>
+          <Paper className={clsx(fixedHeightPaper, { backgroundColor: 'red' })}>
+            <Summary summary={summary} />
+          </Paper>
+        </Grid>
+      ))}
     </>
   );
 
@@ -144,10 +131,15 @@ export default function Dashboard() {
     <Grid item xs={12} spacing={3}>
       <Paper className={tableHeight} p={12}>
         <Title>Top 5 Order</Title>
-        <Table />
+
+        {Object.keys(tableDatas).length && (
+          <Table data={tableDatas.ordersTop5} />
+        )}
         <Box mt={5} mb={2}>
           <Title>Bottom 5 Order</Title>
-          <Table />
+          {Object.keys(tableDatas).length && (
+            <Table data={tableDatas.orderBottom5} />
+          )}
         </Box>
       </Paper>
     </Grid>
@@ -157,10 +149,12 @@ export default function Dashboard() {
     <Grid item xs={12} spacing={3}>
       <Paper className={tableHeight} p={12}>
         <Title>Top 5 User</Title>
-        <Table />
+        {Object.keys(tableDatas).length && <Table data={tableDatas.userTop5} />}
         <Box mt={5} mb={2}>
           <Title>Bottom 5 User</Title>
-          <Table />
+          {Object.keys(tableDatas).length && (
+            <Table data={tableDatas.userTop5} />
+          )}
         </Box>
       </Paper>
     </Grid>
@@ -170,11 +164,10 @@ export default function Dashboard() {
     <Grid item xs={12}>
       <Paper className={tableHeight}>
         <Title>Order Report</Title>
-        <Report />
+        {Object.keys(reportData).length && <Report data={reportData} />}
       </Paper>
     </Grid>
   );
-
   return (
     <div className={classes.root}>
       <CssBaseline />
@@ -213,7 +206,7 @@ export default function Dashboard() {
 
             <Grid item xs={12} mt={4}>
               <Paper className={chartHeight}>
-                <Chart />
+                <Chart data={chartData} />
               </Paper>
             </Grid>
             {displayOrderTable()}
@@ -228,3 +221,10 @@ export default function Dashboard() {
     </div>
   );
 }
+
+Dashboard.propTypes = {
+  fetchData: PropTypes.func.isRequired,
+};
+export default connect((store) => ({ orders: store.orderStore.orders }), {
+  fetchData,
+})(Dashboard);

@@ -5,81 +5,34 @@ import TableCell from '@material-ui/core/TableCell';
 import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
 import { withStyles } from '@material-ui/core/styles';
+import PropTypes from 'prop-types';
+import { toCapitalize } from '../utils/HelperMethods';
 
-// Generate Order Data
-function createData(id, date, name, shipTo, paymentMethod, amount) {
-  return { id, date, name, shipTo, paymentMethod, amount };
-}
 const StyledTableCell = withStyles(() => ({
   head: {
     fontWeight: 'bold',
   },
 }))(TableCell);
 
-const rows = [
-  createData(
-    0,
-    '16 Mar, 2019',
-    'Elvis Presley',
-    'Tupelo, MS',
-    'VISA ⠀•••• 3719',
-    312.44,
-  ),
-  createData(
-    1,
-    '16 Mar, 2019',
-    'Paul McCartney',
-    'London, UK',
-    'VISA ⠀•••• 2574',
-    866.99,
-  ),
-  createData(
-    2,
-    '16 Mar, 2019',
-    'Tom Scholz',
-    'Boston, MA',
-    'MC ⠀•••• 1253',
-    100.81,
-  ),
-  createData(
-    3,
-    '16 Mar, 2019',
-    'Michael Jackson',
-    'Gary, IN',
-    'AMEX ⠀•••• 2000',
-    654.39,
-  ),
-  createData(
-    4,
-    '15 Mar, 2019',
-    'Bruce Springsteen',
-    'Long Branch, NJ',
-    'VISA ⠀•••• 5919',
-    212.79,
-  ),
-];
-
-export default function Orders() {
+function TableView(props) {
   return (
     <>
       <Table aria-label="simple table">
         <TableHead classes={{ fontWeight: 'bold' }}>
           <TableRow>
-            <StyledTableCell>Date</StyledTableCell>
-            <StyledTableCell>Name</StyledTableCell>
-            <StyledTableCell>Ship To</StyledTableCell>
-            <StyledTableCell>Payment Method</StyledTableCell>
-            <StyledTableCell align="right">Sale Amount</StyledTableCell>
+            {props.data.header.map((value) => (
+              <StyledTableCell>{value}</StyledTableCell>
+            ))}
           </TableRow>
         </TableHead>
         <TableBody>
-          {rows.map((row) => (
-            <TableRow key={row.id}>
-              <StyledTableCell>{row.date}</StyledTableCell>
-              <StyledTableCell>{row.name}</StyledTableCell>
-              <StyledTableCell>{row.shipTo}</StyledTableCell>
-              <StyledTableCell>{row.paymentMethod}</StyledTableCell>
-              <StyledTableCell align="right">{row.amount}</StyledTableCell>
+          {props.data.row.map((row) => (
+            <TableRow>
+              {row.map((value) => (
+                <StyledTableCell>
+                  {typeof value === 'string' ? toCapitalize(value) : value}
+                </StyledTableCell>
+              ))}
             </TableRow>
           ))}
         </TableBody>
@@ -87,3 +40,8 @@ export default function Orders() {
     </>
   );
 }
+
+TableView.propTypes = {
+  data: PropTypes.object.isRequired,
+};
+export default TableView;

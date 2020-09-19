@@ -12,7 +12,7 @@ import rootReducer from '../reducers';
 // });
 const store = createStore(rootReducer, applyMiddleware(thunk));
 store.subscribe(() => {
-  console.log(store); //eslint-disable-line
+  console.log(store.getState()); //eslint-disable-line
 });
 
 export default store;

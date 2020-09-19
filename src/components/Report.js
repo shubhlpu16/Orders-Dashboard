@@ -7,6 +7,8 @@ import TableContainer from '@material-ui/core/TableContainer';
 import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
 import Paper from '@material-ui/core/Paper';
+import PropTypes from 'prop-types';
+import { toCapitalize } from '../utils/HelperMethods';
 
 const StyledTableCell = withStyles((theme) => ({
   head: {
@@ -26,25 +28,13 @@ const StyledTableRow = withStyles((theme) => ({
   },
 }))(TableRow);
 
-function createData(name, calories, fat, carbs, protein) {
-  return { name, calories, fat, carbs, protein };
-}
-
-const rows = [
-  createData('Frozen yoghurt', 159, 6.0, 24, 4.0),
-  createData('Ice cream sandwich', 237, 9.0, 37, 4.3),
-  createData('Eclair', 262, 16.0, 24, 6.0),
-  createData('Cupcake', 305, 3.7, 67, 4.3),
-  createData('Gingerbread', 356, 16.0, 49, 3.9),
-];
-
 const useStyles = makeStyles({
   table: {
     minWidth: 700,
   },
 });
 
-export default function Report() {
+export default function Report(props) {
   const classes = useStyles();
 
   return (
@@ -52,23 +42,19 @@ export default function Report() {
       <Table className={classes.table} aria-label="customized table">
         <TableHead>
           <TableRow>
-            <StyledTableCell>Dessert (100g serving)</StyledTableCell>
-            <StyledTableCell align="right">Calories</StyledTableCell>
-            <StyledTableCell align="right">Fat&nbsp;(g)</StyledTableCell>
-            <StyledTableCell align="right">Carbs&nbsp;(g)</StyledTableCell>
-            <StyledTableCell align="right">Protein&nbsp;(g)</StyledTableCell>
+            {props.data.header.map((value) => (
+              <StyledTableCell>{value}</StyledTableCell>
+            ))}
           </TableRow>
         </TableHead>
         <TableBody>
-          {rows.map((row) => (
-            <StyledTableRow key={row.name}>
-              <StyledTableCell component="th" scope="row">
-                {row.name}
-              </StyledTableCell>
-              <StyledTableCell align="right">{row.calories}</StyledTableCell>
-              <StyledTableCell align="right">{row.fat}</StyledTableCell>
-              <StyledTableCell align="right">{row.carbs}</StyledTableCell>
-              <StyledTableCell align="right">{row.protein}</StyledTableCell>
+          {props.data.row.map((row) => (
+            <StyledTableRow>
+              {row.map((value) => (
+                <StyledTableCell>
+                  {typeof value === 'string' ? toCapitalize(value) : value}
+                </StyledTableCell>
+              ))}
             </StyledTableRow>
           ))}
         </TableBody>
@@ -76,3 +62,7 @@ export default function Report() {
     </TableContainer>
   );
 }
+
+Report.propTypes = {
+  data: PropTypes.object.isRequired,
+};

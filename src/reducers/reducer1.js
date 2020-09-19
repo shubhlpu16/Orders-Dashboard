@@ -1,5 +1,5 @@
 export const DEFAULT_STORE = {
-  storeData: [],
+  orders: [],
 };
 
 export const ACTION_TYPES = {
@@ -9,7 +9,10 @@ export const ACTION_TYPES = {
 export default function storeAdd(state = DEFAULT_STORE, action) {
   switch (action.type) {
     case ACTION_TYPES.addStore: {
-      return { storeData: [...state.storeData, ...action.payload] };
+      const data = {
+        orders: [...state.orders, ...action.payload.storeData],
+      };
+      return data;
     }
 
     default:
